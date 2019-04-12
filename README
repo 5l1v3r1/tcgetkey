@@ -1,0 +1,96 @@
+What is tcgetkey?
+=================
+
+This is my simple (ugly) PoC at recovering TrueCrypt keys from memory dumps 
+gathered from linux systems using the FireWire bus. It will then use the
+recovered keys to decrypt the volume.
+
+
+It contains 2 programs:
+
+get_mem_dump	gets the memory image via firewire
+tcgetkey	scans the dump and decrypts the volume
+
+
+In order to identify the keys, a new approach was employed, by calculating 
+and comparing Shannon entropy of certain memory regions.
+
+This is a very rough PoC with probably a lot of stupid bugs in the code.
+
+
+
+
+How to build tcgetkey?
+======================
+
+Just run 'make'. You'll need the following:
+
+openssl-dev		 for the AES routines
+libforensic1394		 for the FireWire code
+
+
+You can get OpenSSL from:
+http://www.openssl.org/
+
+You can get libforensic1394 from:
+https://freddie.witherden.org/tools/libforensic1394/
+
+
+
+How to use the tools?
+=====================
+
+You should first acquire a memory dump, by typing:
+
+sudo ./get_mem_dump memory_dump.image
+
+Then you should obtain the truecrypt container (e.g tc.image) and analyze it:
+
+./tcgetkey memory_dump.image tc.image decrypted.image
+
+If it successfully finds your keys, it would attempt to decrypt the whole volume.
+You would get instructions on how to proceed, but it's basically:
+
+losetup /dev/loopX decrypted.image
+mount /dev/loopX /mnt/decrypted
+
+
+
+Limitations
+===========
+
+tcgetkeys supports only physical memory images gathered from Linux hosts.
+It is (well sort of) kernel/architecture-independent except that it only supports little-endian ones now.
+
+Hidden volumes are not supported (this is pending further investigation).
+
+
+
+Disclaimer
+==========
+
+DO NOT use the tools to illegally break into encrypted containers.
+I am not responsible for any harm these tools can do on your systems.
+
+
+Credits
+=======
+
+Freddie Witherden for writing and maintaining libforensic1394
+Dhiru Kholia for his cooperation
+wiki.kernel.org for their detailed documentation of the on-disk layout of EXT filesystems
+Torbjörn Pettersson for his "Cryptographic key recovery from Linux memory dumps" paper.
+
+
+Author
+======
+
+Milen Rangelov <gat3way-at-gat3way.eu>
+
+
+
+
+
+
+
+
